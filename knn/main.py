@@ -3,11 +3,10 @@ import math
 import operator
 
 
-def load_data_set(filename, training_set):
+def load_data_set(filename):
     with open(filename, newline='') as iris:
-        data_reader = csv.reader(iris, delimiter=' ')
-        for line in data_reader:
-            training_set.append((','.join(line)).split(','))
+        data_reader = csv.reader(iris, delimiter=',')
+        return list(data_reader)
 
 
 def get_classes(training_set, classes):
@@ -44,7 +43,7 @@ def find_response(neighbors, classes):
 
 def main():
     k = 3
-    training_set = list()
+    # training_set = list()
     neighbors = list()
     distances = list()
     classes = list()
@@ -52,7 +51,7 @@ def main():
     attributes = 4
 
     # load the Iris data set
-    load_data_set(file, training_set)
+    training_set = load_data_set(file)
 
     # generate response classes from data set
     get_classes(training_set, classes)
