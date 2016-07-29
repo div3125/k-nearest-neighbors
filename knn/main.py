@@ -24,28 +24,23 @@ def find_euclidean_distance(sample, training_set, attributes):
     distances.sort(key=operator.itemgetter(1))
     return distances
 
-def find_neighbors(distances, neighbors, k):
-    for ctr in range(k):
-        neighbors.append(distances[ctr])
+
+def find_neighbors(distances, k):
+    return distances[0:k]
 
 
 def find_response(neighbors, classes):
     votes = [0, 0, 0]
 
-    for instance in neighbors:
-        neighbor = instance.__getitem__(0)
-        for ctr in range(len(classes)):
-            if neighbor[len(neighbor)-1] == classes[ctr]:
-                votes[ctr] += 1;
+    for instance, _ in neighbors:
+        for ctr, c in enumerate(classes):
+            if instance[-1] == c:
+                votes[ctr] += 1
     return max(enumerate(votes), key=operator.itemgetter(1))
 
 
 def main():
     k = 3
-    # training_set = list()
-    neighbors = list()
-    # distances = list()
-    # classes = list()
     file = '../iris-dataset.csv'
     attributes = 4
 
@@ -60,9 +55,8 @@ def main():
 
     # calculate distance from each instance in training data
     distances = find_euclidean_distance(test_instance, training_set, attributes)
-
     # find k nearest neighbors
-    find_neighbors(distances, neighbors, k)
+    neighbors = find_neighbors(distances, k)
 
     # get the class with maximum votes
     index, value = find_response(neighbors, classes)
