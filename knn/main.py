@@ -9,21 +9,20 @@ def load_data_set(filename):
         return list(data_reader)
 
 
-def get_classes(training_set, classes):
-    for instance in training_set:
-        if instance[len(instance)-1] not in classes:
-            classes.append(instance[len(instance)-1])
+def get_classes(training_set):
+    return list(set([c[-1] for c in training_set]))
 
 
-def find_euclidean_distance(sample, training_set, attributes, distances):
+def find_euclidean_distance(sample, training_set, attributes):
+    distances = []
     dist = 0
-    for ctr in range(len(training_set)):
+    for data in training_set:
         for x in range(attributes):
-            dist += (float(training_set[ctr][x]) - sample[x]) ** 2
-        distances.append((training_set[ctr], math.sqrt(dist)))
+            dist += (float(data[x]) - sample[x]) ** 2
+        distances.append((data, math.sqrt(dist)))
         dist = 0
     distances.sort(key=operator.itemgetter(1))
-
+    return distances
 
 def find_neighbors(distances, neighbors, k):
     for ctr in range(k):
@@ -45,22 +44,22 @@ def main():
     k = 3
     # training_set = list()
     neighbors = list()
-    distances = list()
-    classes = list()
-    file = 'iris-dataset.csv'
+    # distances = list()
+    # classes = list()
+    file = '../iris-dataset.csv'
     attributes = 4
 
     # load the Iris data set
     training_set = load_data_set(file)
 
     # generate response classes from data set
-    get_classes(training_set, classes)
+    classes = get_classes(training_set)
 
     # test data
     test_instance = [5.4, 3.2, 1.5, 0.3]
 
     # calculate distance from each instance in training data
-    find_euclidean_distance(test_instance, training_set, attributes, distances)
+    distances = find_euclidean_distance(test_instance, training_set, attributes)
 
     # find k nearest neighbors
     find_neighbors(distances, neighbors, k)
