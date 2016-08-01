@@ -52,8 +52,7 @@ def main():
     try:
         k = int(input('Enter the value of k : '))
         attributes = int(input('Enter the number of attributes in your data set : '))
-
-        training_file = 'iris-dataset.csv'
+        training_file = input('Enter name of file containing training data : ')
 
         # load the training data set
         training_set = load_data_set(training_file)
@@ -74,7 +73,7 @@ def main():
 
         if ch == 1:
             # load test data set
-            test_file = input('Enter file name : ')
+            test_file = input('Enter name of file containing test data : ')
             test_set = load_data_set(test_file)
 
             n = len(test_set)
@@ -85,10 +84,8 @@ def main():
             n = int(input('Enter the number of instances : '))
 
             for ctr in range(n):
-                temp.append(float(input('Enter petal length : ')))
-                temp.append(float(input('Enter petal width : ')))
-                temp.append(float(input('Enter sepal length : ')))
-                temp.append(float(input('Enter sepal width : ')))
+                for ictr in range(attributes):
+                    temp.append(float(input('Enter the value of attribute ' + str(ictr+1) + ' : ')))
                 test_set.append(temp)
 
         else:
