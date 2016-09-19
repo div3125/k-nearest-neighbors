@@ -38,7 +38,7 @@ def find_neighbors(distances, k):
 
 
 def find_response(neighbors, classes):
-    votes = [0, 0, 0]
+    votes = [0] * len(classes)
 
     for instance, _ in neighbors:
         for ctr, c in enumerate(classes):
