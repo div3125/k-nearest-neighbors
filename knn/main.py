@@ -1,5 +1,4 @@
 import csv
-import sys
 import math
 import operator
 
@@ -10,10 +9,10 @@ def load_data_set(filename):
         return list(data_reader)
 
 
-def string_to_float(data_set, attributes):
+def string_to_float(data_set):
     new_set = []
     for data in data_set:
-        new_set.append([float(l) for l in data[0:attributes]] + [data[len(data)-1]])
+        new_set.append([float(x) for x in data[0:len(data)-1]] + [data[len(data)-1]])
     return new_set
 
 
@@ -50,55 +49,37 @@ def find_response(neighbors, classes):
 
 def main():
     try:
+        # get value of k
         k = int(input('Enter the value of k : '))
-        attributes = int(input('Enter the number of attributes in your data set : '))
-        training_file = input('Enter name of file containing training data : ')
 
         # load the training data set
+        training_file = input('Enter name of training data file : ')
         training_set = load_data_set(training_file)
 
         # convert string data to float
-        training_set = string_to_float(training_set, attributes)
+        training_set = string_to_float(training_set)
 
         # generate response classes from data set
         classes = get_classes(training_set)
 
-        # input choice
-        print('1. Read instances from a file (Data should be in comma separated format) ')
-        print('2. Enter data through console')
-        ch = int(input('Enter your choice : '))
+        # load test data set
+        test_file = input('Enter name of test data file : ')
+        test_set = load_data_set(test_file)
 
-        test_set = []
-        temp = []
-
-        if ch == 1:
-            # load test data set
-            test_file = input('Enter name of file containing test data : ')
-            test_set = load_data_set(test_file)
-
-            n = len(test_set)
-            # convert string data to float
-            test_set = string_to_float(test_set, attributes)
-
-        elif ch == 2:
-            n = int(input('Enter the number of instances : '))
-
-            for ctr in range(n):
-                for ictr in range(attributes):
-                    temp.append(float(input('Enter the value of attribute ' + str(ictr+1) + ' : ')))
-                test_set.append(temp)
-
-        else:
-            print('Invalid choice')
-            sys.exit()
+        n = len(test_set)
+        # convert string data to float
+        test_set = string_to_float(test_set)
 
         for ctr in range(n):
             # calculate distance from each instance in training data
-            distances = find_euclidean_distance(test_set[ctr], training_set, attributes)
+            distances = find_euclidean_distance(test_set[ctr], training_set, len(classes))
+
             # find k nearest neighbors
             neighbors = find_neighbors(distances, k)
+
             # get the class with maximum votes
             index, value = find_response(neighbors, classes)
+
             print('The predicted class for sample ' + str(ctr + 1) + ' is : ' + classes[index])
             print('Number of votes : ' + str(value) + ' out of ' + str(k))
 
