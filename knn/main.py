@@ -82,6 +82,9 @@ def knn(training_set, test_set, k):
             print('The predicted class for sample ' + str(test_instance) + ' is : ' + classes[index])
             print('Number of votes : ' + str(value) + ' out of ' + str(k))
 
+            # empty the distance list
+            distances.clear()
+
     except Exception as e:
         print(e)
 
