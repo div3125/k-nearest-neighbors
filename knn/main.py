@@ -1,35 +1,42 @@
-import csv
-import math
-import operator
+from csv import reader
+from sys import exit
+from math import sqrt
+from operator import itemgetter
 
 
 def load_data_set(filename):
-    with open(filename, newline='') as iris:
-        data_reader = csv.reader(iris, delimiter=',')
-        return list(data_reader)
+    try:
+        with open(filename, newline='') as iris:
+            return list(reader(iris, delimiter=','))
+    except FileNotFoundError as e:
+        raise e
 
 
-def string_to_float(data_set):
+def convert_to_float(data_set, mode):
     new_set = []
-    for data in data_set:
-        new_set.append([float(x) for x in data[0:len(data)-1]] + [data[len(data)-1]])
-    return new_set
+    try:
+        if mode == 'training':
+            for data in data_set:
+                new_set.append([float(x) for x in data[:len(data)-1]] + [data[len(data)-1]])
+
+        elif mode == 'test':
+            for data in data_set:
+                new_set.append([float(x) for x in data])
+
+        else:
+            print('Invalid mode, program will exit.')
+            exit()
+
+        return new_set
+
+    except ValueError as v:
+        print(v)
+        print('Invalid data set format, program will exit.')
+        exit()
 
 
 def get_classes(training_set):
     return list(set([c[-1] for c in training_set]))
-
-
-def find_euclidean_distance(sample, training_set, attributes):
-    distances = []
-    dist = 0
-    for data in training_set:
-        for x in range(attributes):
-            dist += (data[x] - sample[x]) ** 2
-        distances.append((data, math.sqrt(dist)))
-        dist = 0
-    distances.sort(key=operator.itemgetter(1))
-    return distances
 
 
 def find_neighbors(distances, k):
@@ -39,40 +46,31 @@ def find_neighbors(distances, k):
 def find_response(neighbors, classes):
     votes = [0] * len(classes)
 
-    for instance, _ in neighbors:
+    for instance in neighbors:
         for ctr, c in enumerate(classes):
-            if instance[-1] == c:
+            if instance[-2] == c:
                 votes[ctr] += 1
 
-    return max(enumerate(votes), key=operator.itemgetter(1))
+    return max(enumerate(votes), key=itemgetter(1))
 
 
-def main():
+def knn(training_set, test_set, k):
+    distances = []
+    dist = 0
+    limit = len(training_set[0]) - 1
+
+    # generate response classes from training data
+    classes = get_classes(training_set)
+
     try:
-        # get value of k
-        k = int(input('Enter the value of k : '))
+        for test_instance in test_set:
+            for row in training_set:
+                for x, y in zip(row[:limit], test_instance):
+                    dist += (x-y) * (x-y)
+                distances.append(row + [sqrt(dist)])
+                dist = 0
 
-        # load the training data set
-        training_file = input('Enter name of training data file : ')
-        training_set = load_data_set(training_file)
-
-        # convert string data to float
-        training_set = string_to_float(training_set)
-
-        # generate response classes from data set
-        classes = get_classes(training_set)
-
-        # load test data set
-        test_file = input('Enter name of test data file : ')
-        test_set = load_data_set(test_file)
-
-        n = len(test_set)
-        # convert string data to float
-        test_set = string_to_float(test_set)
-
-        for ctr in range(n):
-            # calculate distance from each instance in training data
-            distances = find_euclidean_distance(test_set[ctr], training_set, len(classes))
+            distances.sort(key=itemgetter(len(distances[0])-1))
 
             # find k nearest neighbors
             neighbors = find_neighbors(distances, k)
@@ -80,11 +78,42 @@ def main():
             # get the class with maximum votes
             index, value = find_response(neighbors, classes)
 
-            print('The predicted class for sample ' + str(ctr + 1) + ' is : ' + classes[index])
+            # Display prediction
+            print('The predicted class for sample ' + str(test_instance) + ' is : ' + classes[index])
             print('Number of votes : ' + str(value) + ' out of ' + str(k))
 
-    except ValueError:
-        print('Input is not a number')
+    except Exception as e:
+        print(e)
+
+
+def main():
+    try:
+        # get value of k
+        k = int(input('Enter the value of k : '))
+
+        # load the training and test data set
+        training_file = input('Enter name of training data file : ')
+        test_file = input('Enter name of test data file : ')
+        training_set = convert_to_float(load_data_set(training_file), 'training')
+        test_set = convert_to_float(load_data_set(test_file), 'test')
+
+        if not training_set:
+            print('Empty training set')
+
+        elif not test_set:
+            print('Empty test set')
+
+        elif k > len(training_set):
+            print('Expected number of neighbors is higher than number of training data instances')
+
+        else:
+            knn(training_set, test_set, k)
+
+    except ValueError as v:
+        print(v)
+
+    except FileNotFoundError:
+        print('File not found')
 
 
 if __name__ == '__main__':
